@@ -14,10 +14,8 @@
 #=======================================================================================
 
 #install.packages(c("e1071", "caret", "doSNOW", "ipred", "xgboost"))
-library(caret)
-library(doSNOW)
-
-
+library(easypackages)
+libraries(c("e1071", "caret", "doSNOW", "ipred", "xgboost", 'magrittr',  'stats', 'dplyr'))
 
 #=================================================================
 # Load Data
@@ -76,12 +74,11 @@ str(train)
 
 # First, transform all feature to dummy variables.
 dummy.vars <- dummyVars(~ ., data = train[, -1])
-train.dummy <- predict(dummy.vars, train[, -1])
+train.dummy <- stats::predict(dummy.vars, train[, -1]) %>% data.frame(.)
 View(train.dummy)
-
 # Now, impute!
-pre.process <- preProcess(train.dummy, method = "bagImpute")
-imputed.data <- predict(pre.process, train.dummy)
+pre.process <- caret::preProcess(train.dummy, method = "bagImpute")
+imputed.data <- stats::predict(pre.process, train.dummy)
 View(imputed.data)
 
 train$Age <- imputed.data[, 6]
@@ -149,7 +146,7 @@ View(tune.grid)
 # NOTE - Tune this number based on the number of cores/threads 
 # available on your machine!!!
 #
-cl <- makeCluster(10, type = "SOCK")
+cl <- makeCluster(7, type = "SOCK")
 
 # Register cluster so that caret will know to train in parallel.
 registerDoSNOW(cl)
